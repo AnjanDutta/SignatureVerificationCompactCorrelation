@@ -14,7 +14,9 @@ Anjan Dutta, Umapada Pal and Josep Lladós. "Compact Correlated Features for Wri
 ## Steps to run ##
 1. In the 'MatLabCode/main_signature_verification_compcorr.m' file update the following three variables as described:
  (i) dir_libsvm: path to the 'matlab' folder inside libsvm.
+
  (ii) dir_vlfeat: path to the vlfeat root folder.
+
  (iii) Signsroot: path to the containing folder of the README.txt file.
 
 2. Run the script and it will produce the output with precomputed histograms on CEDAR. So, after execution, it should produce the following output:
