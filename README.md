@@ -13,10 +13,10 @@ Anjan Dutta, Umapada Pal and Josep Lladós. "Compact Correlated Features for Wri
 
 ## Steps to run ##
 1. In the 'MatLabCode/main_signature_verification_compcorr.m' file update the following three variables as described:
-1. dir_libsvm: path to the 'matlab' folder inside libsvm.
-1. dir_vlfeat: path to the vlfeat root folder.
-1. Signsroot: path to the containing folder of the README.txt file. 
-2. Run the script and it will produce the output with precomputed histograms on CEDAR. So, after execution, it should produce the following output:
+2. dir_libsvm: path to the 'matlab' folder inside libsvm.
+2. dir_vlfeat: path to the vlfeat root folder.
+2. Signsroot: path to the containing folder of the README.txt file. 
+1. Run the script and it will produce the output with precomputed histograms on CEDAR. So, after execution, it should produce the following output:
 
 Computing kernel for classification...Done.
 
