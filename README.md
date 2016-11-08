@@ -1,20 +1,20 @@
 # README #
 
 What is this?
-================
+=============
 This is a MATLAB toolkit used for the experimentation of the following paper on signature verification. This paper is appeared in ICPR 2016 as an "oral" presentation.
 
 Paper
-========
+=====
 Anjan Dutta, Umapada Pal and Josep Lladós. "Compact Correlated Features for Writer Independent Signature Verification", In ICPR, Cancún, Mexico, 2016.
 
 Dependencies
-=================
+============
 1. vlfeat.
 2. libsvm.
 
 Steps to run
-===============
+============
 1. In the 'MatLabCode/main_signature_verification_compcorr.m' file update the following three variables as described:
  (i) dir_libsvm: path to the 'matlab' folder inside libsvm.
  (ii) dir_vlfeat: path to the vlfeat root folder.
@@ -23,10 +23,7 @@ Steps to run
 2. Run the script and it will produce the output with precomputed histograms on CEDAR. So, after execution, it should produce the following output:
 
 ```
-#!python
-
-
-```
+#!Matlab
 
 Computing kernel for classification...Done.
 Cross Validation Accuracy = 99.9758%
@@ -40,7 +37,7 @@ Cross Validation Accuracy = 100%
 Cross Validation Accuracy = 100%
 Accuracy = 100% (828/828) (classification)
 Accuracy = 100.00, EER = 0.00
-
+...
 ****This is the result on a subset (30%) of the dataset. Note the percent_dataset = 0.3 at the beginning of the code.****
 
 To compute the results on the whole dataset, set the variable 'percent_dataset' (within the switch-case 'CEDAR', see upper portion of the code) equal to 1.0. It will need more RAM. It should bring the following output:
