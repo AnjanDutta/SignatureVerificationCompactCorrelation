@@ -22,6 +22,12 @@ Steps to run
 
 2. Run the script and it will produce the output with precomputed histograms on CEDAR. So, after execution, it should produce the following output:
 
+```
+#!python
+
+
+```
+
 Computing kernel for classification...Done.
 Cross Validation Accuracy = 99.9758%
 Cross Validation Accuracy = 100%
@@ -53,7 +59,7 @@ Accuracy = 100% (2760/2760) (classification)
 Accuracy = 100.00, EER = 0.00
 
 Note
-=======
+=====
 
 1. Precomputed histograms only on CEDAR dataset is provided with this toolkit, those for GPDS have not been provided as they are big in size.
 
