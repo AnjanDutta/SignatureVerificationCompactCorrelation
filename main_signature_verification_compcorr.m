@@ -26,14 +26,15 @@ niter = 10;
 dataset = 'Bengali';
 parts = strsplit(pwd, '/');
 Signsroot = fullfile('/',parts{1:end-1}); % parent folder
+se = strel('disk', 3, 0);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% Precomputed results %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-precomputed_histograms = false;
+precomputed_histograms = true;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Force computation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-force_compute.graphs = false;
+force_compute.graphs = true;
 force_compute.vocab = false;
 force_compute.hist_indices = false;
 force_compute.hists = false;
@@ -129,7 +130,7 @@ switch dataset
         all_writers = [writers1;writers2]; clear writers1 writers2;
         
         train_test_ratio = 0.8; % train test ratio
-        percent_dataset = 0.02; % percentage of training and test data
+        percent_dataset = 0.2; % percentage of training and test data
     otherwise
         
         error('Wrong dataset');
@@ -197,27 +198,56 @@ if(~precomputed_histograms)
                 if(size(im,3)==3)
                     im = rgb2gray(im);
                 end;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% grid points %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                
+%%%%%%%%%%%%%%%%%%%%% grid points on signature pixels %%%%%%%%%%%%%%%%%%%%%
+                
+                mask = imdilate( ~im, se );
+                [ycoors_mask, xcoors_mask] = find( mask );
+                vertices_mask = single([xcoors_mask ycoors_mask]);
+                clear xcoors_mask ycoors_mask;
+                
+                xcoor_end = imsz(2);
+                ycoor_end = imsz(1);    
+                [xcoors_grid, ycoors_grid] = meshgrid(coor_start:...
+                cellsize:xcoor_end,coor_start:cellsize:ycoor_end);                
+                vertices_grid = single([xcoors_grid(:) ycoors_grid(:)]);
+                clear xcoors_grid ycoors_grid;
+                
+                [vertices, ~, idx] = intersect( vertices_mask, vertices_grid, 'rows' );
+                clear vertices_mask vertices_grid;
 
                 descs = vl_hog(im,cellsize,'variant','dalaltriggs');
-                descs = reshape(descs,[],dim_feats);            
-                clear im;
-    
-                xcoor_end = imsz(2);
-                ycoor_end = imsz(1);
-    
-                [xcoors,ycoors] = meshgrid(coor_start:cellsize:xcoor_end,...
-                    coor_start:cellsize:ycoor_end);
-                
-                vertices = single([xcoors(:) ycoors(:)]);
-                clear xcoors ycoors;
+                descs = reshape(descs,[],dim_feats);
+                descs = descs( idx, : );
+                clear im idx;
                 
                 % nearest nbrs
                 dist = pdist(vertices);
                 dist(~dist) = Inf;
                 [I,J] = find(squareform(dist<=2*cellsize));
                 clear dist;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% grid points %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%                 descs = vl_hog(im,cellsize,'variant','dalaltriggs');
+%                 descs = reshape(descs,[],dim_feats);            
+%                 clear im;
+%     
+%                 xcoor_end = imsz(2);
+%                 ycoor_end = imsz(1);
+%     
+%                 [xcoors,ycoors] = meshgrid(coor_start:cellsize:xcoor_end,...
+%                     coor_start:cellsize:ycoor_end);
+%                 
+%                 vertices = single([xcoors(:) ycoors(:)]);
+%                 clear xcoors ycoors;
+%                 
+%                 % nearest nbrs
+%                 dist = pdist(vertices);
+%                 dist(~dist) = Inf;
+%                 [I,J] = find(squareform(dist<=2*cellsize));
+%                 clear dist;
+                
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% feature points %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %                 points = detectHarrisFeatures(im);
@@ -424,7 +454,7 @@ if(~precomputed_histograms)
 
         end;
 
-        save(file_hist_indices,'idx_image','idx_bin','num_clstrs');
+        save(file_hist_indices,'idx_image','idx_bin','num_clstrs','-v7.3');
         clear idx_image idx_bin num_clstrs;
 
     end;
@@ -437,25 +467,19 @@ if(~precomputed_histograms)
 
         histograms = cell(length(num_clstrs),2);
 
-        switch(hist_type)
+        fprintf('Computing histograms...');
 
-            case 'normal'
+        for i = 1:length(num_clstrs)
 
-                fprintf('Computing histograms...');
+            histograms{i} = zeros(nimages,num_clstrs(i),'single');
+            histograms{i} = vl_binsum(histograms{i},single(1),sub2ind([nimages,num_clstrs(i)],idx_image{i},idx_bin{i}));
+            histograms{i} = bsxfun(@times,histograms{i},1./(sum(histograms{i},2)+eps));
 
-                for i = 1:length(num_clstrs)
+        end;        
 
-                    histograms{i} = zeros(nimages,num_clstrs(i),'single');
-                    histograms{i} = vl_binsum(histograms{i},single(1),sub2ind([nimages,num_clstrs(i)],idx_image{i},idx_bin{i}));
-                    histograms{i} = bsxfun(@times,histograms{i},1./(sum(histograms{i},2)+eps));
+        fprintf('Done.\n');
 
-                end;        
-
-                fprintf('Done.\n');
-
-        end;
-
-        save(file_hists,'histograms');    
+        save(file_hists,'histograms','-v7.3');    
         clear idx_image idx_bin num_clstrs histograms;
 
     end;
