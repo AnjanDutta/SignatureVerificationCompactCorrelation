@@ -1,7 +1,5 @@
 # README #
-
 ##What is this?##
-
 This is a MATLAB toolkit used for the experimentation of the following paper on signature verification. This paper is appeared in ICPR 2016 as an "oral" presentation.
 
 ## Paper ##
@@ -49,7 +47,6 @@ Accuracy = 100% (2760/2760) (classification)
 Accuracy = 100.00, EER = 0.00
 
 ## Note ##
-
 1. Precomputed histograms only on CEDAR dataset is provided with this toolkit, those for GPDS have not been provided as they are big in size.
 2. To recompute results, remember to set the variable 'precomputed_histograms' to false.
 3. To produce any results on GPDS dataset, put the corresponding images inside the GPDS folder. Getting results on GPDS dataset will take long time.
