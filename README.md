@@ -13,13 +13,9 @@ Anjan Dutta, Umapada Pal and Josep Lladós. "Compact Correlated Features for Wri
 
 ## Steps to run ##
 1. In the 'MatLabCode/main_signature_verification_compcorr.m' file update the following three variables as described:
-
  (i) dir_libsvm: path to the 'matlab' folder inside libsvm.
-
  (ii) dir_vlfeat: path to the vlfeat root folder.
-
  (iii) Signsroot: path to the containing folder of the README.txt file.
-
 2. Run the script and it will produce the output with precomputed histograms on CEDAR. So, after execution, it should produce the following output:
 
 Computing kernel for classification...Done.
@@ -77,11 +73,8 @@ Accuracy = 100.00, EER = 0.00
 ## Note ##
 
 1. Precomputed histograms only on CEDAR dataset is provided with this toolkit, those for GPDS have not been provided as they are big in size.
-
 2. To recompute results, remember to set the variable 'precomputed_histograms' to false.
-
 3. To produce any results on GPDS dataset, put the corresponding images inside the GPDS folder. Getting results on GPDS dataset will take long time.
-
 4. This code has been checked only on Linux platform (Ubuntu 14.04, 16.04). Please report bug to Anjan Dutta by writing an email at duttanjan@gmail.com.
 
 ## Licensing ##
