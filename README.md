@@ -1,14 +1,14 @@
 # README #
 
-* What is this?
+*What is this?
 ================
 This is a MATLAB toolkit used for the experimentation of the following paper on signature verification. This paper is appeared in ICPR 2016 as an "oral" presentation.
 
-* Paper
+*Paper
 ========
 Anjan Dutta, Umapada Pal and Josep Lladós. "Compact Correlated Features for Writer Independent Signature Verification", In ICPR, Cancún, Mexico, 2016.
 
-* Dependencies
+*Dependencies
 =================
 1. vlfeat.
 2. libsvm.
