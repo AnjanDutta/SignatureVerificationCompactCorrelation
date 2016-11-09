@@ -115,7 +115,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-dir_name = '/home/anjan/Workspace/SignatureVerification/Datasets/Bengali';
+dir_name = '/home/anjan/Workspace/SignatureVerification/Datasets/Hindi';
 subdir_names = dir(dir_name);
 fp1 = fopen( fullfile( dir_name, 'list.genuine'), 'w' );
 fp2 = fopen( fullfile( dir_name, 'list.forgery'), 'w' );
@@ -123,8 +123,11 @@ fp2 = fopen( fullfile( dir_name, 'list.forgery'), 'w' );
 for i = 1:length(subdir_names)
     if( ~strcmp(subdir_names(i).name, '.') && ~strcmp(subdir_names(i).name, '..') && subdir_names(i).isdir )
         file_names = dir( fullfile( dir_name, subdir_names(i).name, '/*.tif' ) );
+        if( length( file_names ) ~= 54 )
+            keyboard;
+        end;
         for j = 1:length(file_names)
-            parts = strsplit( file_names(j).name, '-' );
+            parts = strsplit( file_names(j).name, '-' );            
             if( parts{4} == 'G' )
                 fprintf(fp1, '%s\n', fullfile( subdir_names(i).name, file_names(j).name ) );
             elseif( parts{4} == 'F' )

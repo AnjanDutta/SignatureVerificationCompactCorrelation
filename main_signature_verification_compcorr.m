@@ -1,11 +1,12 @@
-function main_signature_verification_compcorr( )
+function main_signature_verification_compcorr(dataset)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Paths %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%% FIRST SET THE PATHS %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-dir_libsvm = '/home/anjan/Dropbox/Personal/Workspace/AdditionalTools/libsvm/matlab'; % path to matlab folder of libsvm
-dir_vlfeat = '/home/anjan/Dropbox/Personal/Workspace/AdditionalTools/vlfeat'; % path to vlfeat
+dir_libsvm = '/backup/matlab/temp/pacharya/ANJAN/AdditionalTools/libsvm/matlab'; % path to matlab folder of libsvm
+dir_liblinear = '/backup/matlab/temp/pacharya/ANJAN/AdditionalTools/liblinear/matlab'; % path to matlab folder of liblinear
+dir_vlfeat = '/backup/matlab/temp/pacharya/ANJAN/AdditionalTools/vlfeat'; % path to vlfeat
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Parameters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -15,7 +16,8 @@ nedge_descs_consd = 4e5; % number of edge descriptors considered for kmeans
 nclasses = 2; % number of classes of classification problem
 kernel = 'KL1'; % kernel for classification
 Cs = 2.^(-7:2:9); % SVM C parameter
-opt_str = '-s 0 -t 4 -v 5 -c %f -g 0.003 -b 1 -q'; % SVM option string
+opt_str_libsvm = '-s 0 -t 4 -v 5 -c %f -g 0.003 -b 1 -q'; % LIBSVM option string
+opt_str_liblinear = '-s 0 -v 5 -c %f -e 0.0001 -q'; % LIBLINEAR option string
 rng(0); % seeding randomization
 max_chunk_size = 100; % chunk size in number of images
 patchsize = 10; % patchsize of hog
@@ -23,14 +25,14 @@ cellsize = 8;
 ncells = 1;
 dim_feats = 36*ncells^2; % hog = 36, surf = 64
 niter = 10;
-dataset = 'Bengali';
+% dataset = 'Hindi';
 parts = strsplit(pwd, '/');
 Signsroot = fullfile('/',parts{1:end-1}); % parent folder
 se = strel('disk', 3, 0);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% Precomputed results %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-precomputed_histograms = true;
+precomputed_histograms = false;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Force computation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -44,6 +46,7 @@ force_compute.kernels = true;
 
 % add path 
 addpath(dir_libsvm);
+addpath(dir_liblinear);
 addpath(genpath(dir_vlfeat));
 
 % remove some of the added vlfeat paths to avoid conflicts
@@ -79,23 +82,23 @@ switch dataset
         train_test_ratio = 0.9; % train test ratio
         percent_dataset = 0.3; % percentage of training and test data
         
-    case 'GPDS' % GPDS dataset        
+    case 'GPDS300' % GPDS300 dataset        
         
-        fp1 = fopen(fullfile(Signsroot,'/Datasets/GPDS/list.genuine'));
+        fp1 = fopen(fullfile(Signsroot,'/Datasets/GPDS300/list.genuine'));
         images1 = textscan(fp1,'%s');
         fclose(fp1);
-        fp2 = fopen(fullfile(Signsroot,'/Datasets/GPDS/list.forgery'));
+        fp2 = fopen(fullfile(Signsroot,'/Datasets/GPDS300/list.forgery'));
         images2 = textscan(fp2,'%s');
         fclose(fp2);
         images1 = images1{:};
         writers1 = single(cellfun(@str2num,strtok(images1,'/')));
-        images1 = cellfun(@(x)fullfile(Signsroot,'Datasets/GPDS',x),images1,'UniformOutput',false);
+        images1 = cellfun(@(x)fullfile(Signsroot,'Datasets/GPDS300',x),images1,'UniformOutput',false);
         sigs_per_writer1 = min(histc(writers1, unique(writers1)));
         tot_sigs_pair1 = nchoosek(sigs_per_writer1,2);
         
         images2 = images2{:};
         writers2 = -single(cellfun(@str2num,strtok(images2,'/')));
-        images2 = cellfun(@(x)fullfile(Signsroot,'Datasets/GPDS',x),images2,'UniformOutput',false);
+        images2 = cellfun(@(x)fullfile(Signsroot,'Datasets/GPDS300',x),images2,'UniformOutput',false);
         sigs_per_writer2 = min(histc(writers2, unique(writers2)));
         tot_sigs_pair2 = sigs_per_writer1*sigs_per_writer2;
         
@@ -130,11 +133,42 @@ switch dataset
         all_writers = [writers1;writers2]; clear writers1 writers2;
         
         train_test_ratio = 0.8; % train test ratio
-        percent_dataset = 0.2; % percentage of training and test data
-    otherwise
+        percent_dataset = 0.02; % percentage of training and test data
         
+    case 'Hindi'
+        
+        fp1 = fopen(fullfile(Signsroot,'/Datasets/Hindi/list.genuine'));
+        images1 = textscan(fp1,'%s');
+        fclose(fp1);
+        fp2 = fopen(fullfile(Signsroot,'/Datasets/Hindi/list.forgery'));
+        images2 = textscan(fp2,'%s');
+        fclose(fp2);
+        
+        images1 = images1{:};
+        writers1 = single(cellfun(@str2num,strtok(images1,'/')));
+        images1 = cellfun(@(x)fullfile(Signsroot,'Datasets/Hindi',x),images1,'UniformOutput',false);
+        sigs_per_writer1 = min(histc(writers1, unique(writers1)));
+        tot_sigs_pair1 = nchoosek(sigs_per_writer1,2);
+        
+        images2 = images2{:};
+        writers2 = -single(cellfun(@str2num,strtok(images2,'/')));
+        images2 = cellfun(@(x)fullfile(Signsroot,'Datasets/Hindi',x),images2,'UniformOutput',false);
+        sigs_per_writer2 = min(histc(writers2, unique(writers2)));
+        tot_sigs_pair2 = sigs_per_writer1*sigs_per_writer2;
+        
+        all_images = [images1;images2]'; clear images1 images2;
+        all_writers = [writers1;writers2]; clear writers1 writers2;
+        
+        train_test_ratio = 0.8; % train test ratio
+        percent_dataset = 0.02; % percentage of training and test data
+        
+    otherwise        
         error('Wrong dataset');
         
+end;
+
+if( ~exist( fullfile( Signsroot,'SavedData',dataset ), 'dir' ) )
+    mkdir( fullfile( Signsroot,'SavedData',dataset ) );
 end;
 
 file_vocabs = fullfile(Signsroot,'SavedData',dataset,'vocab_compcorr.mat');
@@ -168,8 +202,9 @@ ntest_writers = length(test_writers{1});
 
 if(~precomputed_histograms)
 
+    
     for ic = 1:nchunks
-
+        
         file_graphs = fullfile(Signsroot,'SavedData',dataset,sprintf('graphs_compcorr_%03d.mat',ic));
 
         if(~exist(file_graphs,'file')||force_compute.graphs)
@@ -201,7 +236,7 @@ if(~precomputed_histograms)
                 
 %%%%%%%%%%%%%%%%%%%%% grid points on signature pixels %%%%%%%%%%%%%%%%%%%%%
                 
-                mask = imdilate( ~im, se );
+                mask = imdilate( ~imbinarize( im ), se );
                 [ycoors_mask, xcoors_mask] = find( mask );
                 vertices_mask = single([xcoors_mask ycoors_mask]);
                 clear xcoors_mask ycoors_mask;
@@ -592,36 +627,67 @@ for iter = 1:niter
     X_test = X2(test_set,:);
 
     clear X1 X2;
+    
+    % libsvm training and prediction
 
-    fprintf('Computing kernel for classification...');
-
-    K_train = double([(1:size(X_train,1))' vl_alldist2(X_train',X_train',kernel)]);
-    K_test = double([(1:size(X_test,1))' vl_alldist2(X_test',X_train',kernel)]);
-
-    clear X_train X_test;
-
-    fprintf('Done.\n');
-
+%     fprintf('Computing kernel for classification...');
+% 
+%     K_train = double([(1:size(X_train,1))' vl_alldist2(X_train',X_train',kernel)]);
+%     K_test = double([(1:size(X_test,1))' vl_alldist2(X_test',X_train',kernel)]);
+% 
+%     clear X_train X_test;
+% 
+%     fprintf('Done.\n');
+% 
+%     best_model = 0;
+% 
+%     for j=1:length(Cs)    
+%         options = sprintf(opt_str, Cs(j));
+%         model = svmtrain(Y_train, K_train, options);
+%         if(model>best_model)
+%             best_model = model;
+%             best_C = Cs(j);
+%         end;
+%     end;
+% 
+%     options = sprintf(strrep(opt_str,'-v 5 ',''),best_C);
+% 
+%     model_libsvm = svmtrain(Y_train,K_train,options);
+% 
+%     [~,acc,probs] = svmpredict(Y_test,K_test,model_libsvm,'-b 1');
+    
+    % liblinear training and prediction
+    
     best_model = 0;
+    best_C = NaN;
+    
+    % homogeneous kernel map
+    X_train = vl_homkermap( X_train', 3, 'kernel', 'kinters' )';
+    X_test = vl_homkermap( X_test', 3, 'kernel', 'kinters' )';
+    
+    X_train = sparse( double( X_train ) );
+    X_test = sparse( double( X_test ) );
+    Y_train = double( Y_train );
+    Y_test = double( Y_test );
 
     for j=1:length(Cs)    
-        options = sprintf(opt_str,Cs(j));
-        model = svmtrain(Y_train,K_train,options);
-        if(model>best_model)
+        options = sprintf( opt_str_liblinear, Cs(j) );
+        model = train( Y_train, X_train, options );
+        if( model > best_model )
             best_model = model;
             best_C = Cs(j);
         end;
     end;
+    
+    options = sprintf( strrep( opt_str_liblinear, '-v 5 ', '' ), best_C );
 
-    options = sprintf(strrep(opt_str,'-v 5 ',''),best_C);
+    model_liblinear = train( Y_train, X_train, options );
+    
+    [ ~, acc, probs ] = predict( Y_test, X_test, model_liblinear, '-b 1' );
 
-    model_libsvm = svmtrain(Y_train,K_train,options);
+    scores = probs( :, model_liblinear.Label == 1 );
 
-    [~,acc,probs] = svmpredict(Y_test,K_test,model_libsvm,'-b 1');
-
-    scores = probs(:,model_libsvm.Label==1);
-
-    [~,~,info] = vl_roc(vl_Y_test,scores);
+    [~,~,info] = vl_roc( vl_Y_test, scores );
     
     accs(iter) = acc(1);
     eers(iter) = info.eer*100;
